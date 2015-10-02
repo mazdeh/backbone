@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Backbone User Manager -- Tutorial</title>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css">
+</head>
+<body>
+
+
+  <div class="container">
+    <h1>User Manager</h1>
+    <hr />
+    <div class="page"></div>
+  </div>
+
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js" type="text/javascript"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
+
+  <script type="text/javascript">
+  
+  var Router = Backbone.Router.extend({
+    routes: {
+      "": "home"
+    }
+  });
+
+  var router = new Router;
+    router.on('route:home', function() {
+      console.log('Home Page!')
+    })
+    Backbone.history.start();
+
+
+  </script>
+
+
+  </body>
+  </html>
