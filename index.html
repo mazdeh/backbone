@@ -9,10 +9,25 @@
 
 
   <div class="container">
-    <h1>User Manager</h1>
+    <h1>Better Reads</h1>
     <hr />
     <div class="page"></div>
   </div>
+
+
+  <!-- underscore -->
+  <script type="text/template" id="volume-list-template">
+   
+  <% _.each(volumes, function (vol) { %>
+    <div><%= vol['id'] %></div>
+  <% }); %>
+
+
+
+ 
+
+
+  </script>
 
 
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
@@ -20,6 +35,36 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
 
   <script type="text/javascript">
+
+  $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+    options.url = 'https://www.googleapis.com/books/v1' + options.url;
+  });
+
+
+  var Volumes = Backbone.Collection.extend({
+    url: '/volumes?q=quilting'
+  });
+
+
+
+
+  var UserListView = Backbone.View.extend({
+    el: '.page',
+    render: function () {
+      var volumes = new Volumes();
+      var that = this;
+      volumes.fetch({
+        success: function(volumes) {
+          console.log(volumes.models[0].attributes.items)
+          // underscore
+          var template = _.template($('#volume-list-template').html(), { volumes: volumes.models[0].attributes.items });
+          that.$el.html(template);
+        }
+      });
+    }
+  });
+
+
   
   var Router = Backbone.Router.extend({
     routes: {
@@ -27,11 +72,14 @@
     }
   });
 
-  var router = new Router;
-    router.on('route:home', function() {
-      console.log('Home Page!')
-    })
-    Backbone.history.start();
+  var router = new Router();
+  var userListView = new UserListView();
+  
+  router.on('route:home', function() {
+    userListView.render();
+  });
+
+  Backbone.history.start();
 
 
   </script>
