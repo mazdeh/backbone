@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Backbone by mazdeh</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Backbone</h1>
+      <h2 class="project-tagline">An introduction to Backbone.js.</h2>
+      <a href="https://github.com/mazdeh/backbone" class="btn">View on GitHub</a>
+      <a href="https://github.com/mazdeh/backbone/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/mazdeh/backbone/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="an-introduction-to-backbonejs" class="anchor" href="#an-introduction-to-backbonejs" aria-hidden="true"><span class="octicon octicon-link"></span></a>An Introduction to Backbone.js</h1>
+
+<p>Rich client-side web applications struggle to keep data in sync between the HTML UI, Javascript logic, and server-side database. </p>
+
+<p>More often that not, web developers find themselves stuck with piles of jQuery selectors tying the data to the DOM, which in turn, negatively affects performance and overall UX of the WebApp.</p>
+
+<p>Backbone offers a more structured approach to this problem by separating the logic, data, and UI of applications.</p>
+
+<h1>
+<a id="backbone-terminology--mvc" class="anchor" href="#backbone-terminology--mvc" aria-hidden="true"><span class="octicon octicon-link"></span></a>Backbone Terminology — MVC</h1>
+
+<p>Backbone has 3 components:
+*Models
+*Views
+*Collections — not controller.</p>
+
+<h3>
+<a id="1-models" class="anchor" href="#1-models" aria-hidden="true"><span class="octicon octicon-link"></span></a>1. Models</h3>
+
+<ul>
+<li>Handle data and business logic.</li>
+<li>Load and save from the server.</li>
+<li>
+<p>Fire events upon data change.</p>
+
+<p>Whenever a UI action causes an attribute of a model to change, the model triggers a ‘change’ event; the <strong>Views</strong> that are watching the state of the model can then be notified of the change, and update themselves accordingly. This eliminates the need to access DOM elements by specific <em>id</em>’s, and having to manually change the HTML.</p>
+</li>
+</ul>
+
+<blockquote>
+<p>A <strong>Model</strong> manages an internal table of data attributes, and triggers “change” events when any of its data is modified. Models handle syncing data with a persistence layer — usually a REST API with a backing database.</p>
+</blockquote>
+
+<p>A good model is one that is re-useable, easily passed around in the code, and a comprehensive representation of the data it is referencing.</p>
+
+<h3>
+<a id="2-views" class="anchor" href="#2-views" aria-hidden="true"><span class="octicon octicon-link"></span></a>2. Views</h3>
+
+<ul>
+<li>Listen for changes, and render UI.</li>
+<li>Handle user input and interactivity.</li>
+<li>Send input to model.</li>
+</ul>
+
+<blockquote>
+<p>A View is an atomic chunk of user interface. It often renders the data from a specific model, or number of models — but views can also be data-less chunks of UI that stand alone. Models should be generally unaware of views. Instead, views listen to the model "change" events, and react or re-render themselves appropriately.</p>
+</blockquote>
+
+<h3>
+<a id="3-collections" class="anchor" href="#3-collections" aria-hidden="true"><span class="octicon octicon-link"></span></a>3. Collections</h3>
+
+<blockquote>
+<p>A <strong>Collection</strong> helps you deal with a group of related models, handling the loading and saving of new models to the server and providing helper functions for performing aggregations or computations against a list of models. Aside from their own events, collections also proxy through all of the events that occur to models within them, allowing you to listen in one place for any change that might happen to any model in the collection.</p>
+</blockquote>
+
+<h1>
+<a id="example-site" class="anchor" href="#example-site" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example Site</h1>
+
+<p>In this presentation, I will be building a simple single-page web application with <em>Backbone.js</em> to better demonstrate the capabilities of this framework. 
+To make the example more interesting, and to avoid the complexities of implementing the server-side, I am going to be using an API instead — Thomas Davis's API. In a later tutorial, I will replace this API with one that we will write together using <code>express.js</code> — another great JS library, to introduce some server-side excitement to this project.</p>
+
+<h4>
+<a id="set-up" class="anchor" href="#set-up" aria-hidden="true"><span class="octicon octicon-link"></span></a>Set up!</h4>
+
+<p>Create an <code>index.html</code> file, and include Backbone and its dependancies:
+1. jQuery
+2. Underscore</p>
+
+<p>Underscore is a great library of amazing, helpful functions. I will cover Underscore in another tutorial later on, but make sure to include it in your <code>index.html</code>, or you won't be able to follow along with the example site. </p>
+
+<p>Let’s get started!</p>
+
+<h4>
+<a id="backbonerouter" class="anchor" href="#backbonerouter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Backbone.Router</h4>
+
+<p>Backbone is great for single page web applications. The Router watches the URL of your website and allows you to update your site based on the url. Router will also watch for back clicks on the browses, and updates accordingly.</p>
+
+<p>Now, in a <code>&lt;script&gt;</code> tag in your <code>index.html</code> file, set you home page to be the landing page of your website, like below:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> Router <span class="pl-k">=</span> Backbone.Router.extend({
+    routes<span class="pl-k">:</span> {
+      <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>home<span class="pl-pds">"</span></span>
+    }
+  });</pre></div>
+
+<p>Then, we can instantiate a new Router for our site, by doing:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> router <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Router</span>();</pre></div>
+
+<p>The Backbone Router class, emits an event called <code>route</code>, so we can use jQuery to listen to this event.
+Now, <code>console.log()</code> and watch your console on the browser, to make sure you router is working properly.</p>
+
+<div class="highlight highlight-source-js"><pre>router.on(<span class="pl-s"><span class="pl-pds">'</span>route:home<span class="pl-pds">'</span></span>, <span class="pl-k">function</span> () {
+    <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>We<span class="pl-pds">'</span></span>re on the Homepage<span class="pl-k">!</span>);
+});</pre></div>
+
+<p><em>note: The Router starts watching for changes only after you run <code>Backbone.history.start()</code>. So make sure you have this line towards the end of your <code>&lt;script&gt;</code> tag.</em></p>
+
+<h4>
+<a id="backboneview" class="anchor" href="#backboneview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Backbone.View</h4>
+
+<p>Now let's create a Backbone view.
+Each view has a <code>render</code> function that is in charge of rendering the view element.
+Keep in mind, that a view shall not reach for anything outside of its own scope. A view is an atomic chunk of UI.</p>
+
+<p>Here's the syntax:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> UserListView <span class="pl-k">=</span> Backbone.View.extend({
+    el<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>.page<span class="pl-pds">'</span></span>,
+    <span class="pl-en">render</span><span class="pl-k">:</span> <span class="pl-k">function</span> () {
+        <span class="pl-v">this</span>.$el.html(<span class="pl-s"><span class="pl-pds">'</span>content here<span class="pl-pds">'</span></span>);
+    }
+});</pre></div>
+
+<p>We pass in the DOM element to the view, through the View’s  <code>el</code> attribute. Then we can access the specific element inside the view by <code>this.$el</code>.</p>
+
+<p><em>note: Make sure you have a div with class name <code>page</code> in your html. That is where the Backbone.View will be rendering itself!</em></p>
+
+<p>Now we need to instantiate the view we just created, and render it on our home page.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> userListView <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">UserListView</span>();</pre></div>
+
+<p>Then, we can ask Router to render the userListView for us, on the homepage, by calling userListView’s <code>render()</code> function.</p>
+
+<div class="highlight highlight-source-js"><pre>router.on(<span class="pl-s"><span class="pl-pds">'</span>route:home<span class="pl-pds">'</span></span>, <span class="pl-k">function</span> () {
+    userListView.render();
+})</pre></div>
+
+<p>And that is the basics of how you create a view and render it in the HTML.</p>
+
+<h4>
+<a id="backbonecollection" class="anchor" href="#backbonecollection" aria-hidden="true"><span class="octicon octicon-link"></span></a>Backbone.Collection</h4>
+
+<p>Collections keep our data. So to populate our users view, we are going to create a Backbone.Collection, and point its <code>url</code> to a resource endpoint. The Collection will pull from that <code>url</code> and store that data.</p>
+
+<p><em>note: you need to define the <code>base url</code> of your resource endpoint in an ajaxPrefilter function.</em></p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> Users <span class="pl-k">=</span> Backbone.Collection.extend({
+    url<span class="pl-k">:</span> ‘<span class="pl-k">/</span>users<span class="pl-s"><span class="pl-pds">'</span></span>
+<span class="pl-s"><span class="pl-ii">});</span></span></pre></div>
+
+<p>Go ahead and instantiate the Users Collection, inside your userListView’s <code>render()</code> function.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> users <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Users</span>();</pre></div>
+
+<p>Now we need to fetch down the data from the <code>/users</code> datasource to populate the users instance of this collection.</p>
+
+<p>_note: <code>fetch()</code> is one of the many Underscore methods that Backbone utilizes. I will be adding more information about Underscore later on. For now, you can just copy the code from <code>index.html</code>, where you see <code>underscore</code> comments.</p>
+
+<p><em>note: that in fetch's callback function, we do <em>not</em> have access to <code>this</code>. Hence we need to pass the scope down to the success function by doing:</em></p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> that <span class="pl-k">=</span> <span class="pl-v">this</span>;</pre></div>
+
+<p>and then use <code>that</code> inside the success callback.</p>
+
+<div class="highlight highlight-source-js"><pre>users.fetch({
+    <span class="pl-en">success</span><span class="pl-k">:</span> <span class="pl-k">function</span>() {
+        that.$el.html(<span class="pl-s"><span class="pl-pds">'</span>data came down!<span class="pl-pds">'</span></span>);
+    }
+});</pre></div>
+
+<p>Refresh the page, check the <em>network</em> tab in your Chrome Dev Tools, and you will see that the data has been successfully fetched!</p>
+
+<p>This concludes our very brief discussion of how to use a RESTful API with Backbone's Router, in addition to Backbone's Views and Collections to fetch data from a server and render it in the html.</p>
+
+<p>It should be clear to a somewhat experienced web developer how Backbone's structured approach in separating data and logic from the UI, is making things much easier, and smooth.</p>
+
+<hr>
+
+<p>Next we're going to introduce Backbone Models, and show you how they can make your lives easier, as web dev's.</p>
+
+<p>What we've done so far is we've handled a response from a <code>GET</code> request from the server. We've parsed the data through our <em>Collection</em> class and rendered it using a <em>View</em>.</p>
+
+<p>Now, we are going to see how we can use Routers and Models to do some other HTTP requests (i.e POST, PUT, DELETE).</p>
+
+<p><em>note: to be able to continue on using Thomas's server, we are going to implement a simple add/edit user functionality to the current state of our app. This will however change as we move onto implementing our own server, using <code>express.js</code>.</em></p>
+
+<p>Make a button somewhere inside the Underscore template (<code>user-list-template</code>). The <code>href</code> should point to <code>#/new</code>.</p>
+
+<p>We're using a <code>#</code> because this is a single-page application, we do not want to navigate to a different page. Backbone removes the hashtag from the URL. </p>
+
+<p>Now we need to let the Router know that we have another URL that it should be watching for. So let's go ahead and add that to the Router class:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> Router <span class="pl-k">=</span> Backbone.Router.extend({
+    routes<span class="pl-k">:</span> {
+      <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>home<span class="pl-pds">"</span></span>,
+      <span class="pl-s"><span class="pl-pds">"</span>new<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>editUser<span class="pl-pds">"</span></span>
+    }
+});</pre></div>
+
+<p>And tell the router to do the right thing, when it observes the <code>/new</code> URL.</p>
+
+<div class="highlight highlight-source-js"><pre>router.on(<span class="pl-s"><span class="pl-pds">'</span>route:editUser<span class="pl-pds">'</span></span>, <span class="pl-k">function</span>() {
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>I know what do, when New is clicked.<span class="pl-pds">'</span></span>);
+});</pre></div>
+
+<p>So, as you may have guessed, we need a new View here, so that when the New button is clicked we show the user and appropriate view, where they can add their user information. So let's create a Backbone View that does just that :</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> EditUserView <span class="pl-k">=</span> Backbone.View.extend({
+  el<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>.page<span class="pl-pds">'</span></span>,
+  <span class="pl-en">render</span><span class="pl-k">:</span> <span class="pl-k">function</span> () {
+    <span class="pl-v">this</span>.$el.html(<span class="pl-s"><span class="pl-pds">'</span>We<span class="pl-pds">'</span></span>re on <span class="pl-k">/new!</span><span class="pl-s"><span class="pl-pds">'</span><span class="pl-ii">);</span></span>
+<span class="pl-s"><span class="pl-ii">  }</span></span>
+<span class="pl-s"><span class="pl-ii">});</span></span></pre></div>
+
+<p>Note that we are passing the same <code>el</code> to this view, because we would want it to replace the current element of the DOM with the new one that we will be providing it with.</p>
+
+<p>As you should have guessed by now, we are going to instantiate the new view, and update our router listener to render the view when it observes the new URL.</p>
+
+<p>Now let's make that <code>editUserView</code> show something more meaningful. Just add a new Underscore template with the <code>id="edit-user-template"</code> and update the view so that it populates the <code>html</code> with the template you just created. In you template, it would makes sense to have some sort of a form, where you'd ask for things like firstname, lastname, and age. You will also need a Submit button, so we can actually do a <code>POST</code> to server.</p>
+
+<p><em>note: the templates in this example are all made using Underscore's templating, which I will cover later on! You could however use any templating tool you prefer, like Handlebars, etc.</em></p>
+
+<p>The updated view should look something like this:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> EditUserView <span class="pl-k">=</span> Backbone.View.extend({
+  el<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>.page<span class="pl-pds">'</span></span>,
+  <span class="pl-en">render</span><span class="pl-k">:</span> <span class="pl-k">function</span> () {
+    <span class="pl-k">var</span> template <span class="pl-k">=</span> _.template($(<span class="pl-s"><span class="pl-pds">'</span>#edit-user-template<span class="pl-pds">'</span></span>).html(), { });
+    <span class="pl-v">this</span>.$el.html(template);
+  }
+});</pre></div>
+
+<p>Now if you click on the New button, it should take you to the Create New User page, and show you the form you created in the template.</p>
+
+<h5>
+<a id="backbone-events" class="anchor" href="#backbone-events" aria-hidden="true"><span class="octicon octicon-link"></span></a>Backbone Events</h5>
+
+<p>We need a way to listen to the form's submit button, so that we take the appropriate action to create a new user, when the button is clicked. Backbone Views have a events object, that listens for different events that happen on the specified DOM elements.</p>
+
+<p>Here's the syntax for how you'd create events inside a Backbone View:</p>
+
+<div class="highlight highlight-source-js"><pre>events<span class="pl-k">:</span> {
+  <span class="pl-s"><span class="pl-pds">'</span>event selector<span class="pl-pds">'</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>action<span class="pl-pds">'</span></span>
+}</pre></div>
+
+<p><code>event</code> could be any jQuery event (i.e. click, focus, etc.).
+We would like to listen to the submit event of the <code>.edit-user-template</code> form, and then we want to fire a function that handles a <code>POST</code> to the server. So:</p>
+
+<div class="highlight highlight-source-js"><pre>events<span class="pl-k">:</span> {
+  <span class="pl-s"><span class="pl-pds">'</span>submit .edit-user-template<span class="pl-pds">'</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>saveUser<span class="pl-pds">'</span></span>
+}</pre></div>
+
+<p>The event passes an <code>ev</code> object to <code>saveUser</code> that gives us access to that specific event.</p>
+
+<p>Now that we are listening to this event, let's define our <code>saveUser</code> function inside the View.
+Fist, we need to grab the form elements and turn it into a JSON object. You can find a jQuery <code>serizlizeObject()</code> function online that does that for you. </p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-en">saveUser</span><span class="pl-k">:</span> <span class="pl-k">function</span> (<span class="pl-smi">ev</span>) {
+  <span class="pl-k">var</span> userDetails <span class="pl-k">=</span> $(ev.currentTarget).serializeObject();
+}</pre></div>
+
+<p>Now that we have a JSON object (model) of the data, let's turn it into a Backbone Model.</p>
+
+<h4>
+<a id="backbonemodel" class="anchor" href="#backbonemodel" aria-hidden="true"><span class="octicon octicon-link"></span></a>Backbone.Model</h4>
+
+<p>Models are the units in a Collection. So where the Collection is an array of object (models), the Model is the actual object. So we are going to call the Model <code>User</code> rather than <code>Users</code>, that we used for the Collection.</p>
+
+<p>The syntax that should look familiar to you by now:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> User <span class="pl-k">=</span> Backbone.Model.extend({
+    urlRoot<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>/users<span class="pl-pds">'</span></span>
+});</pre></div>
+
+<p><code>urlRoot</code> is pretty similar to the <code>url</code> attribute that you saw in Collections. The Model class however knows how to append to the <code>urlRoot</code> based on the request it gets. So if we did a <code>PUT</code> requests, it appends the <code>id</code> to the end of the <code>urlRoot</code>. Similarly for <code>DELETE</code>. But if we were to do a <code>POST</code> to <code>/users</code>, it would know that there doesn't need to be an <code>id</code> attached to the <code>urlRoot</code>. </p>
+
+<p>Now that we have a Model, we want the <code>saveUser</code> function to save this model to the server for us. So in <code>saveUser</code> we add:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> user <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">User</span>(); <span class="pl-c">// instantiate the Model</span>
+user.save(userDetails, {
+  <span class="pl-en">success</span><span class="pl-k">:</span> <span class="pl-k">function</span>() {
+    <span class="pl-c">// do something</span>
+  }
+});
+<span class="pl-k">return</span> <span class="pl-c1">false</span>; <span class="pl-c">// this line is required to finish the request!</span></pre></div>
+
+<p>As you can see, the <code>save()</code> function, takes in as its first argument, the model object, and as its second argument an options hash, where you could tell it what to do upon <code>success</code> or <code>error</code>. </p>
+
+<p><code>save()</code> is intelligent enough to know what request to send to the server. So if you check your network tab, after you create a new user, you should see a <code>POST</code> request.</p>
+
+<p>But what if this user already existed in our database, and we only wanted to do a <code>PUT</code> request to update it?
+Let's modify our code, just a little bit, to account for that case.</p>
+
+<p>First, you should add an <em>edit</em> button to your <code>edit-user-template</code>, for each user in the table. We need to include the <code>id</code> of the user that we're trying to edit in the <code>href</code> of the edit button. So when then Edit button is clicked, our URL should change to something like: <code>#/edit/user.id</code></p>
+
+<p><em>note: Don't worry, passing in the <code>user.id</code> via the HTML is Underscore stuff that I will cover later!</em></p>
+
+<p>Now we should update our Router to watch for the <code>/edit</code> URL.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> Router <span class="pl-k">=</span> Backbone.Router.extend({
+  routes<span class="pl-k">:</span> {
+    <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>home<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>new<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>editUser<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>edit/:id<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>editUser<span class="pl-pds">"</span></span>
+  }
+});</pre></div>
+
+<p>Notice that the Router will direct both <code>new</code> and <code>edit/:id</code> to the same editUser's callback. So we need to modify our callback to account for when there's an <code>id</code> passed along. This means our <code>router</code> instance will have an <code>id</code> passed on to it.</p>
+
+<div class="highlight highlight-source-js"><pre>router.on(<span class="pl-s"><span class="pl-pds">'</span>route:editUser<span class="pl-pds">'</span></span>, <span class="pl-k">function</span>(<span class="pl-smi">id</span>) { <span class="pl-c">// id is being passed to the callback function</span>
+  editUserView.render(id);
+});</pre></div>
+
+<p>So now we can pass that <code>id</code> to our <code>render()</code> function and modify our <code>EditUserView</code> to account for that.
+This is simply done by adding an <code>options</code> variable to our <code>render()</code> function inside <code>EditUserView</code>, and then adding some conditionals to see if <code>id</code> is present or not. If we have an <code>options.id</code>, we should want to fetch that user from the server and populate the form with that user's info, and if no id is present, we will just have an empty form, so that the a new user's info could be entered.</p>
+
+<p>Here's how our <code>render()</code> function would look like after these changes:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-en">render</span><span class="pl-k">:</span> <span class="pl-k">function</span> (<span class="pl-smi">options</span>) {
+  <span class="pl-k">if</span> (options.<span class="pl-c1">id</span>) {
+    <span class="pl-k">var</span> user <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">User</span>({id<span class="pl-k">:</span> options.<span class="pl-c1">id</span>});
+    <span class="pl-k">var</span> that <span class="pl-k">=</span> <span class="pl-v">this</span>;
+    user.fetch({
+      <span class="pl-en">success</span><span class="pl-k">:</span> <span class="pl-k">function</span>(<span class="pl-smi">user</span>) {
+        <span class="pl-k">var</span> template <span class="pl-k">=</span> _.template($(<span class="pl-s"><span class="pl-pds">'</span>#edit-user-template<span class="pl-pds">'</span></span>).html(), { user<span class="pl-k">:</span> user });  <span class="pl-c">// pass in the user model</span>
+        that.$el.html(template);  <span class="pl-c">// populated form</span>
+      }
+    })
+  } <span class="pl-k">else</span> {
+    <span class="pl-k">var</span> template <span class="pl-k">=</span> _.template($(<span class="pl-s"><span class="pl-pds">'</span>#edit-user-template<span class="pl-pds">'</span></span>).html(), { user<span class="pl-k">:</span> <span class="pl-c1">null</span> });   <span class="pl-c">// no id present, no user model</span>
+    <span class="pl-v">this</span>.$el.html(template);  <span class="pl-c">// empty form</span>
+  }
+}</pre></div>
+
+<p>Now we need to make sure our form gets populated with the user's data. This is more Underscore stuff that I will be covering later!</p>
+
+<p>We are now able to update a user on the server, by sending a <code>PUT</code> request. As we already talked about <code>user.save()</code> knows what request to send to the server based on if there's an <code>id</code> or not.</p>
+
+<hr>
+
+<p>This concludes our introduction to Backbone.js. This tutorial was inspired by Thomas Davis's. I will update this project with more information on Underscore, and then I will be creating a server-side component for it, using Express. Stay tuned!</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/mazdeh/backbone">Backbone</a> is maintained by <a href="https://github.com/mazdeh">mazdeh</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
