@@ -15,18 +15,47 @@
   </div>
 
 
-  <!-- underscore -->
-  <script type="text/template" id="volume-list-template">
-   
-  <% _.each(volumes, function (vol) { %>
-    <div><%= vol['id'] %></div>
-  <% }); %>
+  <!-- underscore template -->
+  <script type="text/template" id="user-list-template">
+    <a href="#/new" class="btn btn-primary">New</a>
+    <hr />
+    <table class="table striped">
+      <thead>
+        <tr>
+          <th>First Name</th><th>Last Name</th><th>Age</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% _.each(users, function(user) { %>
+          <tr>
+            <td><%= user.get('firstname') %></td>
+            <td><%= user.get('lastname') %></td>
+            <td><%= user.get('age') %></td>
+            <td><a class="btn" href="#/edit/<%= user.id %>">Edit</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </script>
 
 
-
- 
-
-
+   <!-- underscore template -->
+  <script type="text/template" id="edit-user-template">
+    <form class="edit-user-form">
+      <legend><%= user ? 'Edit' : 'New' %> User</legend>
+        <label>First Name</label>
+        <input name="firstname" type="text" value="<%= user ? user.get('firstname') : '' %>">
+        <label>Last Name</label>
+        <input name="lastname" type="text" value="<%= user ? user.get('lastname') : '' %>">
+        <label>Age</label>
+        <input name="age" type="text" value="<%= user ? user.get('age') : '' %>">
+        <hr />
+       <button type="submit" class="btn"><%= user ? 'Update' : 'Create' %></button>
+       <% if(user) { %>
+        <input type="hidden" name="id" value="<%= user.id %>" />
+       <button data-user-id="<%= user.id %>" class="btn btn-danger delete">Delete</button>
+       <% }; %>
+    </form>
   </script>
 
 
@@ -37,46 +66,104 @@
   <script type="text/javascript">
 
   $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-    options.url = 'https://www.googleapis.com/books/v1' + options.url;
+    options.url = 'http://backbonejs-beginner.herokuapp.com' + options.url;
   });
 
+  $.fn.serializeObject = function() {
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function() {
+        if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
+  };
 
-  var Volumes = Backbone.Collection.extend({
-    url: '/volumes?q=harrypotter'
+
+
+  var Users = Backbone.Collection.extend({
+    url: '/users'
   });
 
-
+  var User = Backbone.Model.extend({
+    urlRoot: '/users'
+  });
 
 
   var UserListView = Backbone.View.extend({
     el: '.page',
     render: function () {
-      var volumes = new Volumes();
+      var users = new Users();
       var that = this;
-      volumes.fetch({
-        success: function(volumes) {
-          console.log(volumes.models[0].attributes.items)
+      users.fetch({
+        success: function(users) {
+          console.log(users)
           // underscore
-          var template = _.template($('#volume-list-template').html(), { volumes: volumes.models[0].attributes.items });
+          var template = _.template($('#user-list-template').html(), { users: users.models });
           that.$el.html(template);
         }
       });
     }
   });
 
-
+  var EditUserView = Backbone.View.extend({
+    el: '.page',
+    render: function (options) {
+      if (options.id) {
+        var user = new User({id: options.id});
+        var that = this;
+        user.fetch({
+          success: function(user) {
+            var template = _.template($('#edit-user-template').html(), { user: user});
+            that.$el.html(template);
+          }
+        })
+      } else {
+        var template = _.template($('#edit-user-template').html(), { user: null });
+        this.$el.html(template);
+      }
+    },
+    events: {
+      'submit .edit-user-form': 'saveUser'
+    },
+    saveUser: function (ev) {
+      var userDetails = $(ev.currentTarget).serializeObject();
+      var user = new User(); // instantiate the Model
+      user.save(userDetails, {
+        success: function(user) {
+          console.log('success')
+          router.navigate('', { trigger: true });
+        }
+      });
+      return false;
+    }
+  });
   
   var Router = Backbone.Router.extend({
     routes: {
-      "": "home"
+      "": "home",
+      "new": "editUser",
+      "edit/:id": "editUser"
     }
   });
 
+  // instantiating Backbone classes
   var router = new Router();
   var userListView = new UserListView();
+  var editUserView = new EditUserView();
   
+  // watching for specific URL's
   router.on('route:home', function() {
     userListView.render();
+  });
+  router.on('route:editUser', function(id) {
+    editUserView.render({id: id});
   });
 
   Backbone.history.start();
