@@ -1,5 +1,7 @@
 # An Introduction to Backbone.js
 
+For a better layout, head over to the presentation page: http://mazdeh.github.io/backbone/
+
 Rich client-side web applications struggle to keep data in sync between the HTML UI, Javascript logic, and server-side database. 
 
 More often that not, web developers find themselves stuck with piles of jQuery selectors tying the data to the DOM, which in turn, negetively affects performance and overall UX of the WebApp.
