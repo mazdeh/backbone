@@ -1,6 +1,4 @@
-Backbone JS
-
-# Introduction
+# An Introduction to Backbone.js
 
 Rich client-side web applications struggle to keep data in sync between the HTML UI, Javascript logic, and server-side database. 
 
