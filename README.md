@@ -1,6 +1,7 @@
-# An Introduction to Backbone.js
-
 For a better layout, head over to the presentation page: http://mazdeh.github.io/backbone/
+The example project is in the `index.html`. Download the file and open it in your browser to see the final project.
+
+# An Introduction to Backbone.js
 
 Rich client-side web applications struggle to keep data in sync between the HTML UI, Javascript logic, and server-side database. 
 
